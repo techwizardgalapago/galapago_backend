@@ -6,12 +6,13 @@ class AirtableCrud {
   }
 
   async getRecords(tableName, options) {
-    const { maxRecords, pageSize } = options;
+    const { maxRecords, pageSize, filterByFormula } = options;
     let recordsArray = [];
 
     await this.base(tableName)
       .select({
-        maxRecords: maxRecords || 3,
+        filterByFormula: filterByFormula || "",
+        maxRecords: maxRecords || 100,
         pageSize: pageSize || 1,
       })
       .eachPage((records, fetchNextPage) => {
@@ -90,6 +91,26 @@ class AirtableCrud {
       });
 
     return recordField;
+  }
+
+  async updateMultipleRecords(tableName, records) {
+    let updatedRecords = [];
+    await this.base(tableName)
+      .update(records)
+      .then((records) => {
+        try {
+          records?.forEach(function (record) {
+            updatedRecords.push(record.fields);
+          });
+        } catch (error) {
+          console.log("Error updating records:", error);
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating records:", error);
+        updatedRecords = [];
+      });
+    return updatedRecords;
   }
 
   async deleteRecord(tableName, id) {

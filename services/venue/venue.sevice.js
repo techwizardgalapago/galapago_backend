@@ -1,12 +1,14 @@
 const boom = require("@hapi/boom");
 
-const AirtableCrud = require("../libs/airtable.crud");
+const AirtableCrud = require("../../libs/airtable.crud");
+const VenueScheduleService = require("../venue/venue.schedule.service");
 
 const airtableCrud = new AirtableCrud();
+const scheduleService = new VenueScheduleService();
 
-const tableName = "Users";
+const tableName = "tblQYWHTTuUDwrMgE";
 
-class UserService {
+class VenueService {
   constructor() {
     //
   }
@@ -29,7 +31,19 @@ class UserService {
     }
 
     const fields = await airtableCrud.getRecords(tableName, options);
-    return fields;
+    // Get the schedule for each venue
+    const venuesWithSchedule = await Promise.all(
+      fields.map(async (venue) => {
+        const schedule = await scheduleService.find({
+          filterByFormula: venue.venueID,
+        });
+        // Add the schedule to the venue object
+        venue.VenueSchedules = await schedule;
+        return venue;
+      })
+    );
+    // Return the venues with their schedules
+    return await venuesWithSchedule;
   }
 
   async findOne(id) {
@@ -37,6 +51,13 @@ class UserService {
     if (!fields) {
       throw boom.notFound("Record not found");
     }
+    // Get the schedule for the venue
+    const schedule = await scheduleService.find({
+      filterByFormula: fields.venueID,
+    });
+    // Add the schedule to the venue object
+    fields.VenueSchedules = await schedule;
+
     return fields;
   }
 
@@ -66,4 +87,4 @@ class UserService {
   }
 }
 
-module.exports = UserService;
+module.exports = VenueService;

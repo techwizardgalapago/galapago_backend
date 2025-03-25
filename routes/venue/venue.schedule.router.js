@@ -1,20 +1,20 @@
 const express = require("express");
 
-const UserService = require("../services/user.service");
-const validatorHandler = require("../middlewares/validator.handler");
+const VenueScheduleService = require("../../services/venue/venue.schedule.service");
+const validatorHandler = require("../../middlewares/validator.handler");
 const {
-  createUserSchema,
-  updateUserSchema,
-  getUserSchema,
-  queryUserSchema,
-} = require("../schemas/user.schema");
+  createVenueScheduleSchema,
+  updateVenueScheduleSchema,
+  getVenueScheduleSchema,
+  queryVenueScheduleSchema,
+} = require("../../schemas/venue/venue.schedule.schema");
 
 const router = express.Router();
-const service = new UserService();
+const service = new VenueScheduleService();
 
 router.get(
   "/",
-  validatorHandler(queryUserSchema, "query"),
+  validatorHandler(queryVenueScheduleSchema, "query"),
   async (req, res, next) => {
     try {
       const fields = await service.find(req.query);
@@ -28,7 +28,7 @@ router.get(
 
 router.get(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
+  validatorHandler(getVenueScheduleSchema, "params"),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -43,7 +43,7 @@ router.get(
 
 router.post(
   "/",
-  validatorHandler(createUserSchema, "body"),
+  validatorHandler(createVenueScheduleSchema, "body"),
   async (req, res) => {
     try {
       const body = req.body;
@@ -57,13 +57,15 @@ router.post(
 );
 
 router.put(
-  "/:id",
-  validatorHandler(getUserSchema, "params"),
-  validatorHandler(updateUserSchema, "body"),
+  "/",
+  // validatorHandler(getVenueScheduleSchema, "params"),
+  validatorHandler(updateVenueScheduleSchema, "body"),
   async (req, res) => {
     try {
       const { id } = req.params;
+
       const body = req.body;
+
       const fields = await service.update(id, body);
       res.send(fields);
     } catch (error) {
@@ -75,7 +77,7 @@ router.put(
 
 router.delete(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
+  validatorHandler(getVenueScheduleSchema, "params"),
   async (req, res) => {
     try {
       const { id } = req.params;

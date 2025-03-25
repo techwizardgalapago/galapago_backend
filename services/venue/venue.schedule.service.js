@@ -1,12 +1,12 @@
 const boom = require("@hapi/boom");
 
-const AirtableCrud = require("../libs/airtable.crud");
+const AirtableCrud = require("../../libs/airtable.crud");
 
 const airtableCrud = new AirtableCrud();
 
-const tableName = "Users";
+const tableName = "tblSXgNXDk1oUdicJ";
 
-class UserService {
+class VenueScheduleService {
   constructor() {
     //
   }
@@ -23,11 +23,10 @@ class UserService {
       options.maxRecords = parseInt(limit);
       options.pageSize = parseInt(offset);
     }
-
-    if (filterByFormula) {
+  
+    if (filterByFormula) { 
       options.filterByFormula = "{linkedVenue} = '" + filterByFormula + "'";
     }
-
     const fields = await airtableCrud.getRecords(tableName, options);
     return fields;
   }
@@ -46,9 +45,8 @@ class UserService {
   }
 
   async update(id, fields) {
-    const updatedFields = await airtableCrud.updateRecord(
+    const updatedFields = await airtableCrud.updateMultipleRecords(
       tableName,
-      id,
       fields
     );
     return updatedFields;
@@ -66,4 +64,4 @@ class UserService {
   }
 }
 
-module.exports = UserService;
+module.exports = VenueScheduleService;

@@ -19,11 +19,15 @@
   },
   "homepage": "https://github.com/techwizardgalapago/galapago_backend#readme",
   "dependencies": {
+    "@aws-sdk/client-cloudfront": "^3.772.0",
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/s3-request-presigner": "^3.758.0",
     "@hapi/boom": "^10.0.1",
     "airtable": "^0.12.2",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "joi": "^17.13.3"
+    "joi": "^17.13.3",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

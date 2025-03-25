@@ -1,23 +1,24 @@
 const express = require("express");
 
-const UserService = require("../services/user.service");
-const validatorHandler = require("../middlewares/validator.handler");
+const VenueService = require("../../services/venue/venue.sevice");
+const validatorHandler = require("../../middlewares/validator.handler");
 const {
-  createUserSchema,
-  updateUserSchema,
-  getUserSchema,
-  queryUserSchema,
-} = require("../schemas/user.schema");
+  createVenueSchema,
+  updateVenueSchema,
+  getVenueSchema,
+  queryVenueSchema,
+} = require("../../schemas/venue/venue.shema");
 
 const router = express.Router();
-const service = new UserService();
+const service = new VenueService();
 
 router.get(
   "/",
-  validatorHandler(queryUserSchema, "query"),
+  // validatorHandler(queryVenueSchema, "query"),
   async (req, res, next) => {
     try {
       const fields = await service.find(req.query);
+
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -28,7 +29,7 @@ router.get(
 
 router.get(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
+  validatorHandler(getVenueSchema, "params"),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -43,10 +44,11 @@ router.get(
 
 router.post(
   "/",
-  validatorHandler(createUserSchema, "body"),
+  validatorHandler(createVenueSchema, "body"),
   async (req, res) => {
     try {
       const body = req.body;
+
       const fields = await service.create(body);
       res.send(fields);
     } catch (error) {
@@ -58,12 +60,14 @@ router.post(
 
 router.put(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
-  validatorHandler(updateUserSchema, "body"),
+  validatorHandler(getVenueSchema, "params"),
+  validatorHandler(updateVenueSchema, "body"),
   async (req, res) => {
     try {
       const { id } = req.params;
+
       const body = req.body;
+
       const fields = await service.update(id, body);
       res.send(fields);
     } catch (error) {
@@ -75,7 +79,7 @@ router.put(
 
 router.delete(
   "/:id",
-  validatorHandler(getUserSchema, "params"),
+  validatorHandler(getVenueSchema, "params"),
   async (req, res) => {
     try {
       const { id } = req.params;

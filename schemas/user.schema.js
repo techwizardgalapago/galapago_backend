@@ -45,6 +45,7 @@ const getUserSchema = Joi.object({
 const queryUserSchema = Joi.object({
   limit,
   offset,
+  filterByFormula: userID,
 });
 
 module.exports = {
