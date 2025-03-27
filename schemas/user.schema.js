@@ -11,6 +11,8 @@ const userRole = Joi.string().min(3).max(30);
 const userEvents = Joi.array().items(Joi.string().min(3).max(30));
 const limit = Joi.number().integer();
 const offset = Joi.number().integer();
+const filterField = Joi.string().min(3).max(30);
+const filterValue = Joi.string().min(3).max(30);
 
 const createUserSchema = Joi.array().items(
   Joi.object({
@@ -45,7 +47,8 @@ const getUserSchema = Joi.object({
 const queryUserSchema = Joi.object({
   limit,
   offset,
-  filterByFormula: userID,
+  filterField,
+  filterValue,
 });
 
 module.exports = {

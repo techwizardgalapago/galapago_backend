@@ -12,7 +12,7 @@ class VenueScheduleService {
   }
 
   async find(query) {
-    const { limit, offset, filterByFormula } = query;
+    const { limit, offset, filterField, filterValue } = query;
 
     let options = {};
 
@@ -23,10 +23,11 @@ class VenueScheduleService {
       options.maxRecords = parseInt(limit);
       options.pageSize = parseInt(offset);
     }
-  
-    if (filterByFormula) { 
-      options.filterByFormula = "{linkedVenue} = '" + filterByFormula + "'";
+
+    if (filterField && filterValue) {
+      options.filterByFormula = `{${filterField}} = "${filterValue}"`;
     }
+
     const fields = await airtableCrud.getRecords(tableName, options);
     return fields;
   }

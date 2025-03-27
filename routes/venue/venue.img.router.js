@@ -15,7 +15,6 @@ const service = new VenueImgService();
 router.put(
   "/:id",
   upload.single("image"),
-  // validatorHandler(createVenueSchema, "body"),
   validatorHandler(getVenueSchema, "params"),
   async (req, res) => {
     try {

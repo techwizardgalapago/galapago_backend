@@ -8,10 +8,14 @@ class AirtableCrud {
   async getRecords(tableName, options) {
     const { maxRecords, pageSize, filterByFormula } = options;
     let recordsArray = [];
+    let filterByFormulaCrud = "";
+    if (filterByFormula !== undefined) {
+      filterByFormulaCrud = filterByFormula;
+    }
 
     await this.base(tableName)
       .select({
-        filterByFormula: filterByFormula || "",
+        filterByFormula: `${filterByFormulaCrud}`,
         maxRecords: maxRecords || 100,
         pageSize: pageSize || 1,
       })

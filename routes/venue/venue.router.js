@@ -14,9 +14,10 @@ const service = new VenueService();
 
 router.get(
   "/",
-  // validatorHandler(queryVenueSchema, "query"),
+  validatorHandler(queryVenueSchema, "query"),
   async (req, res, next) => {
     try {
+
       const fields = await service.find(req.query);
 
       res.send(fields);

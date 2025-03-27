@@ -2,6 +2,8 @@ const Joi = require("joi");
 
 const limit = Joi.number().integer();
 const offset = Joi.number().integer();
+const filterField = Joi.string().min(3).max(30);
+const filterValue = Joi.string().min(3).max(30);
 
 const venueID = Joi.string().regex(/^rec[a-zA-Z0-9]{14}$/);
 const venueCategory = Joi.string().min(3).max(30);
@@ -64,7 +66,8 @@ const getVenueSchema = Joi.object({
 const queryVenueSchema = Joi.object({
   limit,
   offset,
-  filterByFormula: venueID,
+  filterField,
+  filterValue,
 });
 
 module.exports = {

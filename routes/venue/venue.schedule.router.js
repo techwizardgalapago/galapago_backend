@@ -55,10 +55,9 @@ router.post(
     }
   }
 );
-
+// Put no necesita :id porque se envía en el body porque hacemos multiples updates
 router.put(
   "/",
-  // validatorHandler(getVenueScheduleSchema, "params"),
   validatorHandler(updateVenueScheduleSchema, "body"),
   async (req, res) => {
     try {

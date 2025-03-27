@@ -14,7 +14,7 @@ class VenueService {
   }
 
   async find(query) {
-    const { limit, offset, filterByFormula } = query;
+    const { limit, offset, filterField, filterValue } = query;
 
     let options = {};
 
@@ -26,16 +26,18 @@ class VenueService {
       options.pageSize = parseInt(offset);
     }
 
-    if (filterByFormula) {
-      options.filterByFormula = "{linkedVenue} = '" + filterByFormula + "'";
+    if (filterField && filterValue) {
+      options.filterByFormula = `{${filterField}} = "${filterValue}"`;
     }
+
 
     const fields = await airtableCrud.getRecords(tableName, options);
     // Get the schedule for each venue
     const venuesWithSchedule = await Promise.all(
       fields.map(async (venue) => {
         const schedule = await scheduleService.find({
-          filterByFormula: venue.venueID,
+          filterField: "linkedVenue",
+          filterValue: fields.venueID,
         });
         // Add the schedule to the venue object
         venue.VenueSchedules = await schedule;
@@ -53,7 +55,8 @@ class VenueService {
     }
     // Get the schedule for the venue
     const schedule = await scheduleService.find({
-      filterByFormula: fields.venueID,
+      filterField: "linkedVenue",
+      filterValue: fields.venueID,
     });
     // Add the schedule to the venue object
     fields.VenueSchedules = await schedule;
