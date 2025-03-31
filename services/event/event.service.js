@@ -1,14 +1,14 @@
 const boom = require("@hapi/boom");
 
-const AirtableCrud = require("../libs/airtable.crud");
-const EventService = require("./event/event.service");
+const AirtableCrud = require("../../libs/airtable.crud");
+const VenueScheduleService = require("../venue/venue.schedule.service");
 
 const airtableCrud = new AirtableCrud();
-const eventService = new EventService();
+const scheduleService = new VenueScheduleService();
 
-const tableName = "Users";
+const tableName = "tblqkq5UMENrV5Ff1";
 
-class UserService {
+class EventService {
   constructor() {
     //
   }
@@ -31,19 +31,8 @@ class UserService {
     }
 
     const fields = await airtableCrud.getRecords(tableName, options);
-    // Get the event for each user
-    const usersWithEvent = await Promise.all(
-      fields.map(async (user) => {
-        const event = await eventService.find({
-          filterField: "eventUsers",
-          filterValue: user.userID,
-        });
-        // Add the event to the user object
-        user.userEvents = await event;
-        return user;
-      })
-    );
-    return usersWithEvent;
+
+    return await fields;
   }
 
   async findOne(id) {
@@ -51,13 +40,14 @@ class UserService {
     if (!fields) {
       throw boom.notFound("Record not found");
     }
-    // Get the event for the user
-    const event = await eventService.find({
-      filterField: "eventUsers",
-      filterValue: fields.userID,
+    // Get the schedule for the venue
+    const schedule = await scheduleService.find({
+      filterField: "linkedVenue",
+      filterValue: fields.venueID,
     });
-    // Add the event to the user object
-    fields.userEvents = await event;
+    // Add the schedule to the venue object
+    fields.VenueSchedules = await schedule;
+
     return fields;
   }
 
@@ -87,4 +77,4 @@ class UserService {
   }
 }
 
-module.exports = UserService;
+module.exports = EventService;

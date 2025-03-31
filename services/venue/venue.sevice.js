@@ -30,14 +30,13 @@ class VenueService {
       options.filterByFormula = `{${filterField}} = "${filterValue}"`;
     }
 
-
     const fields = await airtableCrud.getRecords(tableName, options);
     // Get the schedule for each venue
     const venuesWithSchedule = await Promise.all(
       fields.map(async (venue) => {
         const schedule = await scheduleService.find({
           filterField: "linkedVenue",
-          filterValue: fields.venueID,
+          filterValue: venue.venueID,
         });
         // Add the schedule to the venue object
         venue.VenueSchedules = await schedule;

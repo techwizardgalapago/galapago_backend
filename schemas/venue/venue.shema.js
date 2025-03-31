@@ -14,6 +14,7 @@ const longitude = Joi.number();
 const venueContact = Joi.string().min(3);
 const VenueEvents = Joi.array().items(venueID);
 const venueName = Joi.string().min(3);
+const negocio = Joi.boolean();
 const imageID = Joi.string().regex(/^att[a-zA-Z0-9]{14}$/);
 const url = Joi.string().uri();
 const filename = Joi.string().min(3);
@@ -35,10 +36,11 @@ const createVenueSchema = Joi.array().items(
       venueAddress: venueAddress.required(),
       latitude: latitude,
       longitude: longitude,
-      venueContact: venueContact.required(),
+      venueContact: venueContact,
       VenueEvents: VenueEvents,
       venueName: venueName.required(),
       venueImage: venueImage,
+      negocio: negocio,
       venueDescription: venueDescription.required(),
       VenueSchedules: VenueSchedules,
     }).required(),
@@ -55,6 +57,7 @@ const updateVenueSchema = Joi.object({
   VenueEvents: VenueEvents,
   venueName: venueName,
   venueImage: venueImage,
+  negocio: negocio,
   venueDescription: venueDescription,
   VenueSchedules: VenueSchedules,
 });
