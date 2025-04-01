@@ -30,9 +30,37 @@ class EventService {
       options.filterByFormula = `{${filterField}} = "${filterValue}"`;
     }
 
+    options.sort = [{ field: "startTime", direction: "desc" }];
+
     const fields = await airtableCrud.getRecords(tableName, options);
 
-    return await fields;
+    function obtenerFechaLocal(fechaISO) {
+      const fecha = new Date(fechaISO);
+      return fecha.toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    }
+
+    // Objeto para agrupar eventos por fecha local
+    const eventosAgrupados = {};
+
+    fields.forEach((evento) => {
+      const fechaLocal = obtenerFechaLocal(evento.startTime);
+      if (!eventosAgrupados[fechaLocal]) {
+        eventosAgrupados[fechaLocal] = [];
+      }
+      eventosAgrupados[fechaLocal].push(evento);
+    });
+
+    // Convertir el objeto en un array de objetos con formato { fecha: "YYYY-MM-DD", eventos: [...] }
+    const resultado = Object.entries(eventosAgrupados).map(([fecha]) => ({
+      fecha,
+      eventos: eventosAgrupados[fecha],
+    }));
+
+    return await resultado;
   }
 
   async findOne(id) {

@@ -6,11 +6,18 @@ class AirtableCrud {
   }
 
   async getRecords(tableName, options) {
-    const { maxRecords, pageSize, filterByFormula } = options;
+    const { maxRecords, pageSize, filterByFormula, sort } = options;
     let recordsArray = [];
+
     let filterByFormulaCrud = "";
+
     if (filterByFormula !== undefined) {
       filterByFormulaCrud = filterByFormula;
+    }
+
+    let sortCrud = [];
+    if (sort !== undefined) {
+      sortCrud = sort;
     }
 
     await this.base(tableName)
@@ -18,6 +25,7 @@ class AirtableCrud {
         filterByFormula: `${filterByFormulaCrud}`,
         maxRecords: maxRecords || 100,
         pageSize: pageSize || 1,
+        sort: sortCrud,
       })
       .eachPage((records, fetchNextPage) => {
         try {
