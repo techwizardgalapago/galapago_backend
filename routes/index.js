@@ -1,5 +1,8 @@
 const express = require("express");
 
+//Auth
+const authRouter = require("./auth.router");
+
 //User
 const userRouter = require("./user.router");
 
@@ -15,6 +18,9 @@ const eventImgRouter = require("./event/event.img.router");
 function routerApi(app) {
   const router = express.Router();
   app.use("/api/v1", router);
+
+  //Auth
+  router.use("/auth", authRouter);
 
   //User
   router.use("/users", userRouter);

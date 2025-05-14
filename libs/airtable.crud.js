@@ -91,7 +91,6 @@ class AirtableCrud {
       .update(id, fields)
       .then((record) => {
         try {
-          console.log("records", record);
           recordField = { ...record.fields };
         } catch (error) {
           console.log(error);

@@ -2,6 +2,7 @@ const boom = require("@hapi/boom");
 
 const AirtableCrud = require("../libs/airtable.crud");
 const EventService = require("./event/event.service");
+const bcrypt = require("bcrypt");
 
 const airtableCrud = new AirtableCrud();
 const eventService = new EventService();
@@ -45,6 +46,15 @@ class UserService {
     );
     return usersWithEvent;
   }
+  async findOneByEmail(email) {
+    const fields = await airtableCrud.getRecords(tableName, {
+      filterByFormula: `{userEmail} = "${email}"`,
+    });
+    if (!fields || fields.length === 0) {
+      return false;
+    }
+    return fields[0];
+  }
 
   async findOne(id) {
     const fields = await airtableCrud.getRecordById(tableName, id);
@@ -62,8 +72,58 @@ class UserService {
   }
 
   async create(fields) {
-    const newFields = await airtableCrud.createRecord(tableName, fields);
-    return newFields;
+    // Check of the user pass a google account
+    if (fields?.provider === "google") {
+      const googleFields = [
+        {
+          fields: {
+            firstName: fields.given_name,
+            lastName: fields.family_name,
+            userEmail: fields.email,
+            userRole: "Explorer",
+            googleAccount: true,
+          },
+        },
+      ];
+      // Check if the email already exists
+      const existingUser = await this.findOneByEmail(
+        googleFields[0].fields.userEmail
+      );
+      // if the user already exists, return it
+      if (existingUser) {
+        return [existingUser];
+      }
+      // if the user doesnt exists, create it
+      const newFields = await airtableCrud.createRecord(
+        tableName,
+        googleFields
+      );
+
+      return newFields;
+    } else {
+      // Check if the email already exists
+      const existingUser = await this.findOneByEmail(
+        fields[0].fields.userEmail
+      );
+      // if the user already exists, return it
+      if (existingUser) {
+        delete existingUser.password;
+        return [existingUser];
+      }
+
+      const data = fields[0].fields;
+      // if the user pass a password, hash it
+      if (data.password) {
+        const hash = await bcrypt.hash(data.password, 10);
+        fields[0].fields.password = hash;
+      }
+      // if the user doesnt exists, create it
+      const newFields = await airtableCrud.createRecord(tableName, fields);
+      // delete password from response
+      delete newFields[0].password;
+
+      return newFields;
+    }
   }
 
   async update(id, fields) {

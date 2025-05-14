@@ -7,6 +7,8 @@ const port = process.env.PORT || 8080;
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true })); no se si es necesario
 
+require("./utils/auth");
+
 app.get("/", (req, res) => {
   res.send("galapago Api!");
 });
