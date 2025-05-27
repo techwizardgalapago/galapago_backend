@@ -60,9 +60,12 @@ async function getOrSetCache(key, cb) {
       return JSON.parse(data);
     } else {
       const freshData = await cb();
-      await redisClient.set(key, JSON.stringify(freshData), {
-        EX: DEFAULT_EXPIRATION,
-      });
+      await redisClient.set(
+        key,
+        JSON.stringify(freshData),
+        "EX",
+        DEFAULT_EXPIRATION
+      );
       return freshData;
     }
   } catch (error) {
