@@ -9,12 +9,21 @@ let redisClient = null;
 
 async function initializeRedisClient() {
   if (!redisClient) {
-    redisClient = new Redis.Cluster([
+    redisClient = new Redis.Cluster(
+      [
+        {
+          host: config.redis.host,
+          port: config.redis.port,
+        },
+      ],
       {
-        host: config.redis.host,
-        port: config.redis.port,
-      },
-    ]);
+        dnsLookup: (address, callback) => callback(null, address),
+        redisOptions: {
+          tls: {},
+        },
+      }
+    );
+
     redisClient.on("error", (err) => console.log("Redis Client Error", err));
     redisClient.on("connect", () => {
       console.log("Redis client connected");
