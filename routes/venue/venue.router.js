@@ -8,6 +8,7 @@ const {
   getVenueSchema,
   queryVenueSchema,
 } = require("../../schemas/venue/venue.shema");
+const getOrSetCache = require("../../libs/redis.client");
 
 const router = express.Router();
 const service = new VenueService();
@@ -17,10 +18,12 @@ router.get(
   validatorHandler(queryVenueSchema, "query"),
   async (req, res, next) => {
     try {
+      const venues = await getOrSetCache(`venues`, async () => {
+        const fields = await service.find(req.query);
 
-      const fields = await service.find(req.query);
-
-      res.send(fields);
+        return fields;
+      });
+      res.send(venues);
     } catch (error) {
       //next(error)
       console.log(error);
@@ -34,8 +37,14 @@ router.get(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const fields = await service.findOne(id);
-      res.send(fields);
+
+      const venue = await getOrSetCache(`venues:${id}`, async () => {
+        const fields = await service.findOne(id);
+
+        return fields;
+      });
+
+      res.send(venue);
     } catch (error) {
       //next(error)
       console.log(error);

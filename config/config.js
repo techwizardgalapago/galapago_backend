@@ -25,6 +25,9 @@ const config = {
   },
   email: process.env.EMAIL,
   emailPass: process.env.EMAIL_PASS,
+  redis: {
+    url: process.env.REDIS_URL,
+  },
 };
 
 module.exports = { config };

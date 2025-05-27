@@ -1,8 +1,9 @@
 const express = require("express");
 const routerApi = require("./routes/index");
 const multer = require("multer");
-const app = express();
+
 const port = process.env.PORT || 8080;
+const app = express();
 
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true })); no se si es necesario
