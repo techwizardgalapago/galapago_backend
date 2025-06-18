@@ -10,6 +10,7 @@ const dateOfBirth = Joi.date();
 const reasonForTravel = Joi.array().items(Joi.string().min(3).max(30));
 const userRole = Joi.string().min(3).max(30);
 const userEvents = Joi.array().items(Joi.string().min(3).max(30));
+const userVenues = Joi.array().items(Joi.string().min(3).max(30));
 const googleAccount = Joi.boolean();
 const recoveryToken = Joi.string().min(10).max(100);
 const limit = Joi.number().integer();
@@ -29,6 +30,7 @@ const createUserSchema = Joi.array().items(
       reasonForTravel: reasonForTravel,
       userRole: userRole,
       userEvents: userEvents,
+      userVenues: userVenues,
       googleAccount: googleAccount,
       recoveryToken: recoveryToken,
     }).required(),
@@ -47,6 +49,7 @@ const createUserGoogleSchema = Joi.array().items(
       reasonForTravel: reasonForTravel,
       userRole: userRole,
       userEvents: userEvents,
+      userVenues: userVenues,
       googleAccount: googleAccount,
       recoveryToken: recoveryToken,
     }).required(),
@@ -62,6 +65,7 @@ const updateUserSchema = Joi.object({
   reasonForTravel: reasonForTravel,
   userRole: userRole,
   userEvents: userEvents,
+  userVenues: userVenues,
   googleAccount: googleAccount,
   recoveryToken: recoveryToken,
 });

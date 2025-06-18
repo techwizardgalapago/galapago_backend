@@ -5,51 +5,30 @@ console.log("Redis URL: ", config.redis.url);
 
 const DEFAULT_EXPIRATION = 30;
 
-// let redisClient = null;
+let redisClient = null;
 
-// async function initializeRedisClient() {
-//   if (!redisClient) {
-//     redisClient = new Redis.Cluster(
-//       [
-//         {
-//           host: config.redis.host,
-//           port: config.redis.port,
-//         },
-//       ],
-//       {
-//         dnsLookup: (address, callback) => callback(null, address),
-//         redisOptions: {
-//           tls: {},
-//         },
-//       }
-//     );
-
-//     redisClient.on("error", (err) => console.log("Redis Client Error", err));
-//     redisClient.on("connect", () => {
-//       console.log("Redis client connected");
-//     });
-//     redisClient.on("ready", () => {
-//       console.log("Redis client is ready");
-//     });
-//     await redisClient.connect();
-//   }
-//   return redisClient;
-// }
-
-const redisClient = new Redis.Cluster(
-  [
+if (config.env === "development") {
+  redisClient = new Redis.Cluster([
+    { host: "127.0.0.1", port: 6380 },
+    { host: "127.0.0.1", port: 6381 },
+    { host: "127.0.0.1", port: 6382 },
+  ]);
+} else {
+  redisClient = new Redis.Cluster(
+    [
+      {
+        host: config.redis.host,
+        port: config.redis.port,
+      },
+    ],
     {
-      host: config.redis.host,
-      port: config.redis.port,
-    },
-  ],
-  {
-    dnsLookup: (address, callback) => callback(null, address),
-    redisOptions: {
-      tls: {},
-    },
-  }
-);
+      dnsLookup: (address, callback) => callback(null, address),
+      redisOptions: {
+        tls: {},
+      },
+    }
+  );
+}
 
 async function getOrSetCache(key, cb) {
   try {
