@@ -27,6 +27,7 @@ const venueImage = Joi.array().items(
 );
 const venueDescription = Joi.string().min(3);
 const VenueSchedules = Joi.array().items(venueID);
+const userID = Joi.string().regex(/^rec[a-zA-Z0-9]{14}$/);
 
 const createVenueSchema = Joi.array().items(
   Joi.object({
@@ -43,6 +44,7 @@ const createVenueSchema = Joi.array().items(
       negocio: negocio,
       venueDescription: venueDescription.required(),
       VenueSchedules: VenueSchedules,
+      userID: Joi.array().items(userID),
     }).required(),
   })
 );
@@ -60,6 +62,7 @@ const updateVenueSchema = Joi.object({
   negocio: negocio,
   venueDescription: venueDescription,
   VenueSchedules: VenueSchedules,
+  userID: Joi.array().items(userID),
 });
 
 const getVenueSchema = Joi.object({
