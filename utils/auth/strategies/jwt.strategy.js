@@ -1,3 +1,5 @@
+// jwt.strategy.js
+
 const { Strategy, ExtractJwt} = require('passport-jwt')
 
 const { config } = require('../../../config/config')

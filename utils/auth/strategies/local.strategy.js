@@ -1,3 +1,4 @@
+// local.strategy.js
 const {Strategy} = require("passport-local")
 
 const AuthService = require('../../../services/auth.service')
