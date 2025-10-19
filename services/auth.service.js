@@ -15,13 +15,18 @@ class AuthService {
 
   async getUser(email, password) {
     const user = [];
+    console.log("Authenticating user with email:", email, "and password:", password);
     const fields = await service.findOneByEmail(email);
+    console.log("Found user fields:", fields);
+    console.log("is there a user?", !!fields);
     if (!fields) {
+      console.log("Unauthorized: No user found");
       throw boom.unauthorized();
     }
 
     const isMatch = await bcrypt.compare(password, fields.password);
     if (!isMatch) {
+      console.log("Unauthorized: Password does not match");
       throw boom.unauthorized();
     }
 

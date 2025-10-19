@@ -18,6 +18,7 @@ router.get(
   async (req, res, next) => {
     try {
       const fields = await service.find(req.query);
+      console.log("Fetched users:", fields);
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -31,7 +32,9 @@ router.get(
   validatorHandler(getUserSchema, "params"),
   async (req, res) => {
     try {
+      console.log("req.params:", req.params);
       const { id } = req.params;
+      console.log("Fetching user with ID:", id);
       const fields = await service.findOne(id);
       res.send(fields);
     } catch (error) {

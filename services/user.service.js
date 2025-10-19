@@ -72,6 +72,7 @@ class UserService {
   }
 
   async create(fields) {
+    console.log("fields create account: ",fields);
     // Check of the user pass a google account
     if (fields?.provider === "google") {
       const googleFields = [
