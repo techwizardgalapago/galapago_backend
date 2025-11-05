@@ -74,6 +74,14 @@ class VenueService {
       id,
       fields
     );
+    // Get the schedule for the venue
+    const schedule = await scheduleService.find({
+      filterField: "linkedVenue",
+      filterValue: updatedFields.venueID,
+    });
+    // Add the schedule to the venue object
+    updatedFields.VenueSchedules = await schedule;
+
     return updatedFields;
   }
 

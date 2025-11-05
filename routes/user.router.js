@@ -67,6 +67,7 @@ router.put(
     try {
       const { id } = req.params;
       const body = req.body;
+      console.log("Updating user with ID:", id, "with data:", body);
       const fields = await service.update(id, body);
       res.send(fields);
     } catch (error) {
