@@ -7,7 +7,7 @@ const port = process.env.PORT || 8080;
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:8081'],
+  origin: ['http://localhost:8081', "http://localhost:3000"],
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', "X-Requested-With"],
   credentials: true
