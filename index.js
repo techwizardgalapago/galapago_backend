@@ -7,7 +7,8 @@ const port = process.env.PORT || 8080;
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3000",'http://localhost:8081', "https://api.galago.ec"],
+  // origin: ["http://localhost:3000",'http://localhost:8081', "https://api.galago.ec"],
+  origin: "*",
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', "X-Requested-With"],
   credentials: true
