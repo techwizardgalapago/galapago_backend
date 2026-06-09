@@ -17,6 +17,7 @@ router.get(
   validatorHandler(queryUserSchema, "query"),
   async (req, res, next) => {
     try {
+      console.log("req.query:", req.query);
       const fields = await service.find(req.query);
       console.log("Fetched users:", fields);
       res.send(fields);
