@@ -24,8 +24,8 @@ router.put(
       const url = await service.updateImage(id, file);
       res.send(url);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      console.error('Error uploading venue image:', error);
+      res.status(500).json({ error: error.message || 'Error uploading image' });
     }
   }
 );
