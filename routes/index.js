@@ -15,6 +15,9 @@ const venueScheduleRouter = require("./venue/venue.schedule.router");
 const eventRouter = require("./event/event.router");
 const eventImgRouter = require("./event/event.img.router");
 
+//Tourist Sites
+const touristSiteRouter = require("./tourist-site/tourist.site.router");
+
 //Utils
 const utilsRouter = require("./utils.router");
 
@@ -36,6 +39,9 @@ function routerApi(app) {
   //Event
   router.use("/events", eventRouter);
   router.use("/events-img", eventImgRouter);
+
+  //Tourist Sites
+  router.use("/tourist-sites", touristSiteRouter);
 
   //Utils
   router.use("/resolve-url", utilsRouter);
