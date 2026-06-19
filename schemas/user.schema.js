@@ -13,6 +13,7 @@ const userEvents = Joi.array().items(Joi.string().min(3).max(30));
 const userVenues = Joi.array().items(Joi.string().min(3).max(30));
 const favoriteEvents = Joi.array().items(Joi.string().regex(/^rec[a-zA-Z0-9]{14}$/));
 const favoriteVenues = Joi.array().items(Joi.string().regex(/^rec[a-zA-Z0-9]{14}$/));
+const favoriteSites = Joi.array().items(Joi.string().regex(/^rec[a-zA-Z0-9]{14}$/));
 const googleAccount = Joi.boolean();
 const genero = Joi.string().min(3).max(40);
 const recoveryToken = Joi.string().min(10).max(100);
@@ -39,6 +40,7 @@ const createUserSchema = Joi.array().items(
       genero: genero,
       favoriteEvents: favoriteEvents,
       favoriteVenues: favoriteVenues,
+      favoriteSites: favoriteSites,
     }).required(),
   })
 );
@@ -61,6 +63,7 @@ const createUserGoogleSchema = Joi.array().items(
       genero: genero,
       favoriteEvents: favoriteEvents,
       favoriteVenues: favoriteVenues,
+      favoriteSites: favoriteSites,
     }).required(),
   })
 );
@@ -80,6 +83,7 @@ const updateUserSchema = Joi.object({
   genero: genero,
   favoriteEvents: favoriteEvents,
   favoriteVenues: favoriteVenues,
+  favoriteSites: favoriteSites,
 });
 
 const getUserSchema = Joi.object({
