@@ -3,7 +3,7 @@ const express = require("express");
 const TouristSiteService = require("../../services/tourist-site/tourist.site.service");
 const validatorHandler = require("../../middlewares/validator.handler");
 const { getSiteSchema, querySiteSchema } = require("../../schemas/tourist-site/tourist.site.schema");
-const getOrSetCache = require("../../libs/redis.client");
+const { getOrSetCache } = require("../../libs/redis.client");
 
 const router = express.Router();
 const service = new TouristSiteService();

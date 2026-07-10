@@ -9,6 +9,8 @@ const {
   queryUserSchema,
 } = require("../schemas/user.schema");
 
+const { getOrSetCache, invalidateCache } = require("../libs/redis.client");
+
 const router = express.Router();
 const service = new UserService();
 
@@ -35,8 +37,10 @@ router.get(
     try {
       console.log("req.params:", req.params);
       const { id } = req.params;
-      console.log("Fetching user with ID:", id);
-      const fields = await service.findOne(id);
+      const fields = await getOrSetCache(`user:${id}`, async () => {
+        console.log("Fetching user with ID:", id);
+        return await service.findOne(id);
+      }, 600); // 10 minutes
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -70,6 +74,7 @@ router.put(
       const body = req.body;
       console.log("Updating user with ID:", id, "with data:", body);
       const fields = await service.update(id, body);
+      await invalidateCache(`user:${id}`);
       res.send(fields);
     } catch (error) {
       //next(error)

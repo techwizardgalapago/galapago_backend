@@ -4,6 +4,8 @@ const passport = require("passport");
 const validatorHandler = require("../middlewares/validator.handler");
 // const { changePassword } = require('../schemas/auth.schema')
 
+const { getOrSetCache, invalidateCache } = require("../libs/redis.client");
+
 const router = express.Router();
 const AuthService = require("../services/auth.service");
 const UserService = require("../services/user.service");
@@ -34,12 +36,11 @@ router.get(
     try {
       // `req.user` comes from jwt.strategy.js → payload = { sub, role }
       const userId = req.user.sub;
-      console.log("🔍 /auth/me fetching user ID:", userId);
+      const user = await getOrSetCache(`user:${userId}`, async () => {
+        console.log("🔍 /auth/me fetching user ID:", userId);
+        return await userService.findOne(userId);
+      }, 600); // 10 minutes
 
-      // Fetch the full Airtable record
-      const user = await userService.findOne(userId);
-
-      // Return user data (and maybe their events)
       res.json({ user });
     } catch (error) {
       console.error("❌ /auth/me error:", error);

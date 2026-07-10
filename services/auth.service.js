@@ -5,6 +5,7 @@ const nodemailer = require("nodemailer");
 
 const UserService = require("./user.service");
 const { config } = require("../config/config");
+const { getOrSetCache, invalidateCache } = require("../libs/redis.client");
 
 const service = new UserService();
 
@@ -36,7 +37,16 @@ class AuthService {
   }
 
   async signToken(user) {
-    const fields = await service.create(user);
+    const cacheKey = `auth:user:${user.email || user.userEmail}`;
+    let fields = await getOrSetCache(cacheKey, async () => {
+      const result = await service.create(user);
+      return result;
+    }, 600); // 10 minutes
+
+    if (!fields || !fields[0]) {
+      throw new Error(`signToken: no user returned for ${user.email || user.userEmail}`);
+    }
+
     console.log("fields", fields);
     const payload = {
       sub: fields[0].userID,
@@ -44,7 +54,6 @@ class AuthService {
     };
 
     const secret = config.jwtSecret;
-
     const token = jwt.sign(payload, secret);
 
     return { fields, token };

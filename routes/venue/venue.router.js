@@ -8,7 +8,7 @@ const {
   getVenueSchema,
   queryVenueSchema,
 } = require("../../schemas/venue/venue.shema");
-const getOrSetCache = require("../../libs/redis.client");
+const { getOrSetCache, invalidateCache } = require("../../libs/redis.client");
 
 const router = express.Router();
 const service = new VenueService();

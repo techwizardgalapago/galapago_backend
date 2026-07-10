@@ -3,7 +3,7 @@ const Redis = require("ioredis");
 const { config } = require("../config/config");
 console.log("Redis URL: ", config.redis.url);
 
-const DEFAULT_EXPIRATION = 30;
+const DEFAULT_EXPIRATION = 300; // 5 minutes
 
 let redisClient = null;
 
@@ -30,26 +30,27 @@ if (config.env === "development") {
   );
 }
 
-async function getOrSetCache(key, cb) {
+async function getOrSetCache(key, cb, ttl = DEFAULT_EXPIRATION) {
   try {
-    // initializeRedisClient();
-
     const data = await redisClient.get(key);
     if (data != null) {
       return JSON.parse(data);
-    } else {
-      const freshData = await cb();
-      await redisClient.set(
-        key,
-        JSON.stringify(freshData),
-        "EX",
-        DEFAULT_EXPIRATION
-      );
-      return freshData;
     }
+    const freshData = await cb();
+    await redisClient.set(key, JSON.stringify(freshData), "EX", ttl);
+    return freshData;
   } catch (error) {
-    console.log("error", error);
+    console.log("cache error, falling back to direct fetch:", error.message);
+    return await cb();
   }
 }
 
-module.exports = getOrSetCache;
+async function invalidateCache(key) {
+  try {
+    await redisClient.del(key);
+  } catch (error) {
+    console.log("cache invalidation error", error);
+  }
+}
+
+module.exports = { getOrSetCache, invalidateCache };

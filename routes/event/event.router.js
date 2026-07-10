@@ -8,7 +8,7 @@ const {
   getEventSchema,
   queryEventSchema,
 } = require("../../schemas/event/event.schema");
-const getOrSetCache = require("../../libs/redis.client");
+const { getOrSetCache } = require("../../libs/redis.client");
 
 const router = express.Router();
 const service = new EventService();
