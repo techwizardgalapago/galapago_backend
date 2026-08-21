@@ -8,7 +8,7 @@ const {
   getEventSchema,
   queryEventSchema,
 } = require("../../schemas/event/event.schema");
-const { getOrSetCache } = require("../../libs/redis.client");
+const { getOrSetCache, invalidateKeys } = require("../../libs/redis.client");
 
 const router = express.Router();
 const service = new EventService();
@@ -56,6 +56,7 @@ router.post(
       const body = req.body;
 
       const fields = await service.create(body);
+      await invalidateKeys([`events`]);
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -75,6 +76,7 @@ router.put(
       const body = req.body;
 
       const fields = await service.update(id, body);
+      await invalidateKeys([`events`, `events:${id}`]);
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -90,6 +92,7 @@ router.delete(
     try {
       const { id } = req.params;
       const rta = await service.delete(id);
+      await invalidateKeys([`events`, `events:${id}`]);
       res.send(rta);
     } catch (error) {
       //next(error)

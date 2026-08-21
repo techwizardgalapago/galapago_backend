@@ -8,7 +8,7 @@ const {
   getVenueSchema,
   queryVenueSchema,
 } = require("../../schemas/venue/venue.shema");
-const { getOrSetCache, invalidateCache } = require("../../libs/redis.client");
+const { getOrSetCache, invalidateKeys } = require("../../libs/redis.client");
 
 const router = express.Router();
 const service = new VenueService();
@@ -60,6 +60,7 @@ router.post(
       const body = req.body;
 
       const fields = await service.create(body);
+      await invalidateKeys([`venues`]);
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -79,6 +80,7 @@ router.put(
       const body = req.body;
 
       const fields = await service.update(id, body);
+      await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(fields);
     } catch (error) {
       //next(error)
@@ -94,6 +96,7 @@ router.delete(
     try {
       const { id } = req.params;
       const rta = await service.delete(id);
+      await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(rta);
     } catch (error) {
       //next(error)

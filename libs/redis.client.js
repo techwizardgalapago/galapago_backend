@@ -53,4 +53,10 @@ async function invalidateCache(key) {
   }
 }
 
-module.exports = { getOrSetCache, invalidateCache };
+// Invalida varias claves a la vez. Se usa tras cada escritura para que la
+// siguiente lectura no sirva la version previa durante el TTL.
+async function invalidateKeys(keys = []) {
+  await Promise.all(keys.filter(Boolean).map((key) => invalidateCache(key)));
+}
+
+module.exports = { getOrSetCache, invalidateCache, invalidateKeys };

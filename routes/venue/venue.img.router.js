@@ -9,6 +9,8 @@ const {
   getVenueSchema,
 } = require("../../schemas/venue/venue.shema");
 
+const { invalidateKeys } = require("../../libs/redis.client");
+
 const router = express.Router();
 const service = new VenueImgService();
 
@@ -22,6 +24,7 @@ router.put(
       const file = req.file;
 
       const url = await service.updateImage(id, file);
+      await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(url);
     } catch (error) {
       console.error('Error uploading venue image:', error);
@@ -37,6 +40,7 @@ router.delete(
     try {
       const { id } = req.params;
       const fields = await service.deleteImage(id);
+      await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(fields);
     } catch (error) {
       //next(error)
