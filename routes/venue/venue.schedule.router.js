@@ -35,8 +35,7 @@ router.get(
       const fields = await service.find(req.query);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -44,14 +43,13 @@ router.get(
 router.get(
   "/:id",
   validatorHandler(getVenueScheduleSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const fields = await service.findOne(id);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -59,15 +57,14 @@ router.get(
 router.post(
   "/",
   validatorHandler(createVenueScheduleSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const body = req.body;
       const fields = await service.create(body);
       await invalidateKeys(venueKeysFromBody(body));
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -75,7 +72,7 @@ router.post(
 router.put(
   "/",
   validatorHandler(updateVenueScheduleSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
 
@@ -85,8 +82,7 @@ router.put(
       await invalidateKeys(venueKeysFromBody(body));
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -94,7 +90,7 @@ router.put(
 router.delete(
   "/:id",
   validatorHandler(getVenueScheduleSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const rta = await service.delete(id);
@@ -103,8 +99,7 @@ router.delete(
       await invalidateKeys([`venues`]);
       res.send(rta);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );

@@ -18,7 +18,7 @@ router.get(
       });
       res.send(sites);
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -34,7 +34,7 @@ router.get(
       });
       res.send(site);
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

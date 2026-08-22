@@ -2,6 +2,11 @@ const express = require("express");
 const routerApi = require("./routes/index");
 const multer = require("multer");
 const cors = require("cors");
+const {
+  logErrors,
+  boomErrorHandler,
+  errorHandler,
+} = require("./middlewares/error.handler");
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -26,8 +31,14 @@ app.get("/", (req, res) => {
   res.send("galapago Api!");
 });
 
+routerApi(app);
+
+// Los middlewares de error van despues de las rutas: sin ellos Express
+// responde 500 con el stack trace en el cuerpo.
+app.use(logErrors);
+app.use(boomErrorHandler);
+app.use(errorHandler);
+
 app.listen(port, () => {
   console.log(`App listening at http://localhost:${port}`);
 });
-
-routerApi(app);

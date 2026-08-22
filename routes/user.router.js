@@ -24,8 +24,7 @@ router.get(
       console.log("Fetched users:", fields);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -33,7 +32,7 @@ router.get(
 router.get(
   "/:id",
   validatorHandler(getUserSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       console.log("req.params:", req.params);
       const { id } = req.params;
@@ -43,8 +42,7 @@ router.get(
       }, 600); // 10 minutes
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -52,14 +50,13 @@ router.get(
 router.post(
   "/",
   validatorHandler(createUserSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const body = req.body;
       const fields = await service.create(body);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -68,7 +65,7 @@ router.put(
   "/:id",
   validatorHandler(getUserSchema, "params"),
   validatorHandler(updateUserSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const body = req.body;
@@ -77,8 +74,7 @@ router.put(
       await invalidateCache(`user:${id}`);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -86,14 +82,13 @@ router.put(
 router.delete(
   "/:id",
   validatorHandler(getUserSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const rta = await service.delete(id);
       res.send(rta);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );

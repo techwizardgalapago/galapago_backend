@@ -38,8 +38,9 @@ class AirtableCrud {
         }
       })
       .catch((error) => {
-        console.error(error);
-        return false;
+        // Propagar: si esto devolvia [] el caché guardaba una lista vacia
+        // durante todo el TTL tras un fallo pasajero de Airtable.
+        throw error;
       });
 
     return recordsArray;
@@ -54,8 +55,7 @@ class AirtableCrud {
         recordField = { ...record.fields };
       })
       .catch((error) => {
-        console.error(error);
-        return false;
+        throw error;
       });
 
     return recordField;
@@ -77,8 +77,9 @@ class AirtableCrud {
         }
       })
       .catch((error) => {
-        console.error(error);
-        return false;
+        // Sin este throw una escritura fallida respondia 200 con [] y la app
+        // no podia distinguirla de una exitosa.
+        throw error;
       });
 
     return recordField;
@@ -97,8 +98,7 @@ class AirtableCrud {
         }
       })
       .catch((error) => {
-        console.error(error);
-        return false;
+        throw error;
       });
 
     return recordField;
@@ -118,8 +118,7 @@ class AirtableCrud {
         }
       })
       .catch((error) => {
-        console.error("Error updating records:", error);
-        updatedRecords = [];
+        throw error;
       });
     return updatedRecords;
   }
@@ -132,8 +131,7 @@ class AirtableCrud {
         deleted = true;
       })
       .catch((error) => {
-        console.error("Error deleting record:", error);
-        deleted = false;
+        throw error;
       });
     return deleted;
   }

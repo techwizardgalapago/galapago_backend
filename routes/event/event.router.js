@@ -24,8 +24,7 @@ router.get(
       });
       res.send(events);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -33,7 +32,7 @@ router.get(
 router.get(
   "/:id",
   validatorHandler(getEventSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const event = await getOrSetCache(`events:${id}`, async () => {
@@ -42,8 +41,7 @@ router.get(
       });
       res.send(event);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -51,7 +49,7 @@ router.get(
 router.post(
   "/",
   validatorHandler(createEventSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const body = req.body;
 
@@ -59,8 +57,7 @@ router.post(
       await invalidateKeys([`events`]);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -69,7 +66,7 @@ router.put(
   "/:id",
   validatorHandler(getEventSchema, "params"),
   validatorHandler(updateEventSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
 
@@ -79,8 +76,7 @@ router.put(
       await invalidateKeys([`events`, `events:${id}`]);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -88,15 +84,14 @@ router.put(
 router.delete(
   "/:id",
   validatorHandler(getEventSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const rta = await service.delete(id);
       await invalidateKeys([`events`, `events:${id}`]);
       res.send(rta);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );

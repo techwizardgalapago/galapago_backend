@@ -31,18 +31,32 @@ if (config.env === "development") {
 }
 
 async function getOrSetCache(key, cb, ttl = DEFAULT_EXPIRATION) {
+  // Un fallo de Redis degrada a lectura directa. Un fallo de la fuente de
+  // datos se propaga: nunca se cachea el resultado de un error.
+  let cached = null;
   try {
-    const data = await redisClient.get(key);
-    if (data != null) {
-      return JSON.parse(data);
-    }
-    const freshData = await cb();
-    await redisClient.set(key, JSON.stringify(freshData), "EX", ttl);
-    return freshData;
+    cached = await redisClient.get(key);
   } catch (error) {
-    console.log("cache error, falling back to direct fetch:", error.message);
-    return await cb();
+    console.log("cache read error, falling back to direct fetch:", error.message);
   }
+
+  if (cached != null) {
+    try {
+      return JSON.parse(cached);
+    } catch (error) {
+      console.log("cache entry corrupta, se relee de origen:", key);
+    }
+  }
+
+  const freshData = await cb();
+
+  try {
+    await redisClient.set(key, JSON.stringify(freshData), "EX", ttl);
+  } catch (error) {
+    console.log("cache write error:", error.message);
+  }
+
+  return freshData;
 }
 
 async function invalidateCache(key) {

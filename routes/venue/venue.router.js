@@ -25,8 +25,7 @@ router.get(
       });
       res.send(venues);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -34,7 +33,7 @@ router.get(
 router.get(
   "/:id",
   validatorHandler(getVenueSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
 
@@ -46,8 +45,7 @@ router.get(
 
       res.send(venue);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -55,7 +53,7 @@ router.get(
 router.post(
   "/",
   validatorHandler(createVenueSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const body = req.body;
 
@@ -63,8 +61,7 @@ router.post(
       await invalidateKeys([`venues`]);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -73,7 +70,7 @@ router.put(
   "/:id",
   validatorHandler(getVenueSchema, "params"),
   validatorHandler(updateVenueSchema, "body"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
 
@@ -83,8 +80,7 @@ router.put(
       await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -92,15 +88,14 @@ router.put(
 router.delete(
   "/:id",
   validatorHandler(getVenueSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const rta = await service.delete(id);
       await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(rta);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );

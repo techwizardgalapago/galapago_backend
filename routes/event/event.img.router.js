@@ -16,7 +16,7 @@ router.put(
   "/:id",
   upload.single("image"),
   validatorHandler(getEventSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const file = req.file;
@@ -25,8 +25,7 @@ router.put(
       await invalidateKeys([`events`, `events:${id}`]);
       res.send(url);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
@@ -34,15 +33,14 @@ router.put(
 router.delete(
   "/:id",
   validatorHandler(getEventSchema, "params"),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const fields = await service.deleteImage(id);
       await invalidateKeys([`events`, `events:${id}`]);
       res.send(fields);
     } catch (error) {
-      //next(error)
-      console.log(error);
+      next(error);
     }
   }
 );
