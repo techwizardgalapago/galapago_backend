@@ -31,20 +31,30 @@ class VenueService {
     }
 
     const fields = await airtableCrud.getRecords(tableName, options);
-    // Get the schedule for each venue
-    const venuesWithSchedule = await Promise.all(
-      fields.map(async (venue) => {
-        const schedule = await scheduleService.find({
-          filterField: "linkedVenue",
-          filterValue: venue.venueID,
-        });
-        // Add the schedule to the venue object
-        venue.VenueSchedules = await schedule;
-        return venue;
-      })
-    );
-    // Return the venues with their schedules
-    return await venuesWithSchedule;
+
+    // Antes esto lanzaba una consulta de horarios POR LOCAL. Con el limite de
+    // ~5 peticiones/segundo de Airtable, listar los locales era la operacion
+    // que agotaba la cuota. Ahora se traen todos los horarios de una vez y se
+    // agrupan en memoria: 2 consultas en total, independiente del numero de
+    // locales.
+    const allSchedules = await scheduleService.findAll();
+
+    const byVenue = new Map();
+    for (const schedule of allSchedules || []) {
+      const linked = Array.isArray(schedule?.linkedVenue)
+        ? schedule.linkedVenue
+        : [schedule?.linkedVenue].filter(Boolean);
+      for (const venueId of linked) {
+        if (!byVenue.has(venueId)) byVenue.set(venueId, []);
+        byVenue.get(venueId).push(schedule);
+      }
+    }
+
+    for (const venue of fields) {
+      venue.VenueSchedules = byVenue.get(venue.venueID) || [];
+    }
+
+    return fields;
   }
 
   async findOne(id) {

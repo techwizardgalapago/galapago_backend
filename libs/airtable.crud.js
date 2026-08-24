@@ -24,7 +24,9 @@ class AirtableCrud {
       .select({
         filterByFormula: `${filterByFormulaCrud}`,
         maxRecords: maxRecords || 100,
-        pageSize: pageSize || 1,
+        // pageSize es cuantos registros trae Airtable POR PETICION (max 100).
+        // Estaba en 1, asi que eachPage hacia una peticion por registro.
+        pageSize: pageSize || 100,
         sort: sortCrud,
       })
       .eachPage((records, fetchNextPage) => {

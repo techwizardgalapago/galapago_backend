@@ -32,6 +32,12 @@ class VenueScheduleService {
     return fields;
   }
 
+  // Todos los horarios de una sola vez. venue.service.find los agrupa en
+  // memoria en lugar de lanzar una consulta por local.
+  async findAll() {
+    return await airtableCrud.getRecords(tableName, { maxRecords: 10000 });
+  }
+
   async findOne(id) {
     const fields = await airtableCrud.getRecordById(tableName, id);
     if (!fields) {
