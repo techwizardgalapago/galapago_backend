@@ -1,5 +1,6 @@
 const boom = require("@hapi/boom");
 const AirtableCrud = require("../../libs/airtable.crud");
+const { withPermanentUrls, mapWithPermanentUrls } = require("../../libs/attachments");
 
 const airtableCrud = new AirtableCrud();
 
@@ -27,7 +28,7 @@ class TouristSiteService {
     }
 
     const fields = await airtableCrud.getRecords(tableName, options);
-    return fields;
+    return mapWithPermanentUrls(fields, "siteImage");
   }
 
   async findOne(id) {
@@ -35,7 +36,7 @@ class TouristSiteService {
     if (!fields || Object.keys(fields).length === 0) {
       throw boom.notFound("Tourist site not found");
     }
-    return fields;
+    return withPermanentUrls(fields, "siteImage");
   }
 }
 

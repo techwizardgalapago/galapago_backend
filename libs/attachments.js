@@ -11,10 +11,19 @@ const { config } = require("../config/config");
  * adjunto se cargo a mano en Airtable no estara en S3, y la app puede seguir
  * usando `url` como respaldo.
  */
+// La subida guarda el objeto con este mismo saneado como clave
+// (ver venue.img.sevice.js), asi que la reconstruccion tiene que aplicarlo
+// igual para dar con el archivo.
+const s3KeyFor = (filename) =>
+  typeof filename === "string" && filename.trim()
+    ? filename.replace(/ /g, "_")
+    : null;
+
 const permanentUrlFor = (filename) => {
   const domain = config.aws.cloudfrontDistributionDomain;
-  if (!domain || !filename) return null;
-  return domain + filename;
+  const key = s3KeyFor(filename);
+  if (!domain || !key) return null;
+  return domain + key;
 };
 
 const withPermanentUrls = (record, field) => {
@@ -31,4 +40,4 @@ const withPermanentUrls = (record, field) => {
 const mapWithPermanentUrls = (records, field) =>
   (Array.isArray(records) ? records : []).map((r) => withPermanentUrls(r, field));
 
-module.exports = { permanentUrlFor, withPermanentUrls, mapWithPermanentUrls };
+module.exports = { s3KeyFor, permanentUrlFor, withPermanentUrls, mapWithPermanentUrls };
