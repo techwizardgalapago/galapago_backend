@@ -2,6 +2,7 @@ const boom = require("@hapi/boom");
 
 const AirtableCrud = require("../../libs/airtable.crud");
 const VenueScheduleService = require("../venue/venue.schedule.service");
+const { withPermanentUrls, mapWithPermanentUrls } = require("../../libs/attachments");
 
 const airtableCrud = new AirtableCrud();
 const scheduleService = new VenueScheduleService();
@@ -32,7 +33,10 @@ class EventService {
 
     options.sort = [{ field: "startTime", direction: "desc" }];
 
-    const fields = await airtableCrud.getRecords(tableName, options);
+    const fields = mapWithPermanentUrls(
+      await airtableCrud.getRecords(tableName, options),
+      "eventImage"
+    );
 
     function obtenerFechaLocal(fechaISO) {
       const fecha = new Date(fechaISO);
@@ -76,7 +80,7 @@ class EventService {
     // Add the schedule to the venue object
     fields.VenueSchedules = await schedule;
 
-    return fields;
+    return withPermanentUrls(fields, "eventImage");
   }
 
   async create(fields) {

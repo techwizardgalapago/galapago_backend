@@ -2,6 +2,7 @@ const boom = require("@hapi/boom");
 
 const AirtableCrud = require("../../libs/airtable.crud");
 const VenueScheduleService = require("../venue/venue.schedule.service");
+const { withPermanentUrls, mapWithPermanentUrls } = require("../../libs/attachments");
 
 const airtableCrud = new AirtableCrud();
 const scheduleService = new VenueScheduleService();
@@ -54,7 +55,7 @@ class VenueService {
       venue.VenueSchedules = byVenue.get(venue.venueID) || [];
     }
 
-    return fields;
+    return mapWithPermanentUrls(fields, "venueImage");
   }
 
   async findOne(id) {
@@ -70,7 +71,7 @@ class VenueService {
     // Add the schedule to the venue object
     fields.VenueSchedules = await schedule;
 
-    return fields;
+    return withPermanentUrls(fields, "venueImage");
   }
 
   async create(fields) {
