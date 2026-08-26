@@ -38,7 +38,13 @@ const existeEnS3 = async (key) => {
     );
     return true;
   } catch (e) {
-    if (e?.$metadata?.httpStatusCode === 404 || e?.name === "NotFound") return false;
+    const status = e?.$metadata?.httpStatusCode;
+    // 404 es lo esperado cuando falta la clave. Pero si el usuario IAM no
+    // tiene s3:ListBucket, S3 responde 403 para no revelar que existe o no;
+    // el SDK lo presenta como 'UnknownError'. En ambos casos damos el objeto
+    // por ausente y dejamos que sea PutObject quien mande: si de verdad
+    // faltaran permisos, la subida fallara y se vera en el resumen.
+    if (status === 404 || status === 403 || e?.name === "NotFound") return false;
     throw e;
   }
 };
@@ -60,6 +66,7 @@ const descargar = async (url) => {
   console.log(APLICAR ? "MODO REAL: se subiran archivos\n" : "SIMULACRO: no se sube nada (usa --apply)\n");
 
   const resumen = { yaEstaban: 0, subidos: 0, sinArchivo: 0, fallidos: 0 };
+  const vistas = new Map(); // clave -> nº de adjuntos que la reclaman
 
   for (const { nombre, tableName, field } of OBJETIVOS) {
     console.log(`--- ${nombre}`);
@@ -69,6 +76,7 @@ const descargar = async (url) => {
       const adjuntos = Array.isArray(registro?.[field]) ? registro[field] : [];
       for (const adjunto of adjuntos) {
         const key = s3KeyFor(adjunto?.filename);
+        if (key) vistas.set(key, (vistas.get(key) || 0) + 1);
         if (!key) {
           resumen.sinArchivo++;
           console.log(`  ?  adjunto sin filename, se omite`);
@@ -98,10 +106,22 @@ const descargar = async (url) => {
           console.log(`  +  ${key} (${(buffer.length / 1024).toFixed(0)} kb)`);
         } catch (e) {
           resumen.fallidos++;
-          console.log(`  x  ${key}: ${e.message}`);
+          const status = e?.$metadata?.httpStatusCode;
+          console.log(
+            `  x  ${key}: ${e.name || "Error"}${status ? ` (HTTP ${status})` : ""} ${e.message || ""}`.trim()
+          );
         }
       }
     }
+  }
+
+  const colisiones = [...vistas.entries()].filter(([, n]) => n > 1);
+  if (colisiones.length) {
+    console.log("\nAVISO: varios adjuntos comparten la misma clave en S3.");
+    console.log("La subida usa el nombre de archivo como clave, asi que el ultimo");
+    console.log("en subirse pisa al anterior y ambos registros acaban con la misma");
+    console.log("imagen. Afecta tambien a las subidas normales desde la app.");
+    colisiones.forEach(([k, n]) => console.log(`  ${n}x  ${k}`));
   }
 
   console.log("\nresumen:", resumen);

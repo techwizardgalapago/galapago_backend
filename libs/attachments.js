@@ -23,7 +23,11 @@ const permanentUrlFor = (filename) => {
   const domain = config.aws.cloudfrontDistributionDomain;
   const key = s3KeyFor(filename);
   if (!domain || !key) return null;
-  return domain + key;
+  // La clave se codifica: algunos nombres que vienen de Airtable ya contienen
+  // secuencias % (p.ej. '...6.33.14%C3%A2%C2%80%C2%AFPM.png'). Puestas crudas
+  // en la URL, el CDN las decodificaria a otros bytes y no encontraria el
+  // objeto. Codificar hace que se decodifiquen de vuelta a la clave exacta.
+  return domain + encodeURIComponent(key);
 };
 
 const withPermanentUrls = (record, field) => {
