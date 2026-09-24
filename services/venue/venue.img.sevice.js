@@ -7,6 +7,7 @@ const { config } = require("../../config/config");
 const cloudFront = require("../../libs/aws.cloudfront");
 
 const AirtableCrud = require("../../libs/airtable.crud");
+const { uploadKeyFor, s3KeyFor } = require("../../libs/attachments");
 
 const airtableCrud = new AirtableCrud();
 
@@ -18,13 +19,19 @@ class VenueImgService {
   }
 
   async updateImage(id, file) {
-    // Replace spaces with underscores
-    file.originalname = file.originalname.replace(/ /g, "_");
+    // La clave lleva el ID del registro: con el nombre a secas, dos registros
+    // con archivos igual llamados compartian un objeto y el segundo pisaba al
+    // primero. Airtable devuelve este mismo nombre como `filename`, que es lo
+    // que la lectura usa para rehacer la URL permanente.
+    const key = uploadKeyFor(id, file.originalname);
+    if (!key) {
+      throw boom.badRequest("El archivo no tiene nombre");
+    }
 
     // Upload the image to S3
     const params = {
       Bucket: config.aws.bucketName,
-      Key: file.originalname,
+      Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
     };
@@ -32,8 +39,7 @@ class VenueImgService {
     const command = new PutObjectCommand(params);
     await s3.send(command);
 
-    const imageUrl =
-      config.aws.cloudfrontDistributionDomain + file.originalname;
+    const imageUrl = config.aws.cloudfrontDistributionDomain + key;
 
     // upload image to airtable
     const newFields = { venueImage: [{ url: imageUrl }] };
@@ -52,11 +58,17 @@ class VenueImgService {
       throw boom.notFound("Record not found");
     }
 
+    // Mismo saneado que en la subida: la clave en S3 no lleva espacios, asi
+    // que borrar con el filename crudo erraba el objeto y lo dejaba huerfano.
     const filename = fields?.venueImage[0]?.filename;
+    const key = s3KeyFor(filename);
+    if (!key) {
+      throw boom.notFound("El registro no tiene imagen");
+    }
 
     const params = {
       Bucket: config.aws.bucketName,
-      Key: filename,
+      Key: key,
     };
     // Delete the image from S3
     const command = new DeleteObjectCommand(params);
@@ -69,7 +81,7 @@ class VenueImgService {
         CallerReference: `${Date.now()}`,
         Paths: {
           Quantity: 1,
-          Items: [`/${filename}`],
+          Items: [`/${key}`],
         },
       },
     };

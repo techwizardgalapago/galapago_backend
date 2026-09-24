@@ -19,6 +19,30 @@ const s3KeyFor = (filename) =>
     ? filename.replace(/ /g, "_")
     : null;
 
+// Un adjunto subido por la app se guarda en S3 bajo su nombre de archivo. Dos
+// registros con archivos del mismo nombre compartian entonces un solo objeto y
+// la subida mas reciente reemplazaba a la anterior. El ID del registro lo hace
+// unico.
+//
+// El prefijo va DENTRO del nombre, no como carpeta: Airtable re-hospeda el
+// adjunto y reporta como `filename` solo el basename de la URL que le dimos,
+// asi que 'events/recXXX/foto.png' volveria como 'foto.png'. Ademas getRecords
+// devuelve unicamente record.fields, sin el ID, de modo que la lectura no
+// tendria con que reconstruir la carpeta. Metido en el nombre, el filename que
+// Airtable devuelve ya ES la clave y s3KeyFor sigue bastando.
+const PREFIJO_ID = /^rec[A-Za-z0-9]{14}_/;
+
+const uploadKeyFor = (recordId, filename) => {
+  const base = s3KeyFor(filename);
+  if (!base) return null;
+  // Se quita un prefijo previo antes de poner el nuevo, para que volver a
+  // subir un archivo ya descargado de la app no encadene IDs.
+  const limpio = base.replace(PREFIJO_ID, "");
+  return typeof recordId === "string" && recordId.trim()
+    ? `${recordId}_${limpio}`
+    : limpio;
+};
+
 const permanentUrlFor = (filename) => {
   const domain = config.aws.cloudfrontDistributionDomain;
   const key = s3KeyFor(filename);
@@ -44,4 +68,10 @@ const withPermanentUrls = (record, field) => {
 const mapWithPermanentUrls = (records, field) =>
   (Array.isArray(records) ? records : []).map((r) => withPermanentUrls(r, field));
 
-module.exports = { s3KeyFor, permanentUrlFor, withPermanentUrls, mapWithPermanentUrls };
+module.exports = {
+  s3KeyFor,
+  uploadKeyFor,
+  permanentUrlFor,
+  withPermanentUrls,
+  mapWithPermanentUrls,
+};
