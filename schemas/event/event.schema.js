@@ -15,7 +15,9 @@ const endTime = Joi.string().min(3).max(30);
 const eventVenueID = Joi.array().items(
   Joi.string().regex(/^rec[a-zA-Z0-9]{14}$/)
 );
-const organizador = Joi.string().min(3).max(30);
+// Nombre de quien organiza. El limite era 30 porque antes se guardaba un id
+// de Airtable; un nombre completo con dos apellidos se pasa de ahi.
+const organizador = Joi.string().min(3).max(100);
 const eventCapacity = Joi.number();
 const eventPrice = Joi.number();
 const userEvents = Joi.array().items(eventID);
