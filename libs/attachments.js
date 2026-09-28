@@ -30,7 +30,13 @@ const s3KeyFor = (filename) =>
 // devuelve unicamente record.fields, sin el ID, de modo que la lectura no
 // tendria con que reconstruir la carpeta. Metido en el nombre, el filename que
 // Airtable devuelve ya ES la clave y s3KeyFor sigue bastando.
-const PREFIJO_ID = /^rec[A-Za-z0-9]{14}_/;
+// El prefijo incluye un testigo corto ademas del ID: un registro puede tener
+// varias imagenes y dos fotos del mismo carrete se llaman igual muy a menudo
+// ('IMG_0001.jpg'), asi que solo con el ID la segunda pisaria a la primera.
+const PREFIJO_ID = /^rec[A-Za-z0-9]{14}_[0-9a-z]{8}_/;
+
+const testigo = () =>
+  (Date.now().toString(36) + Math.random().toString(36).slice(2)).slice(-8);
 
 const uploadKeyFor = (recordId, filename) => {
   const base = s3KeyFor(filename);
@@ -39,7 +45,7 @@ const uploadKeyFor = (recordId, filename) => {
   // subir un archivo ya descargado de la app no encadene IDs.
   const limpio = base.replace(PREFIJO_ID, "");
   return typeof recordId === "string" && recordId.trim()
-    ? `${recordId}_${limpio}`
+    ? `${recordId}_${testigo()}_${limpio}`
     : limpio;
 };
 

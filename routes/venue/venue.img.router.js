@@ -14,21 +14,23 @@ const { invalidateKeys } = require("../../libs/redis.client");
 const router = express.Router();
 const service = new VenueImgService();
 
+// `any` y no `array("images")` para que siga valiendo el campo `image` en
+// singular: las versiones de la app ya publicadas suben con ese nombre.
 router.put(
   "/:id",
-  upload.single("image"),
+  upload.any(),
   validatorHandler(getVenueSchema, "params"),
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const file = req.file;
+      const files = req.files?.length ? req.files : [req.file];
 
-      const url = await service.updateImage(id, file);
+      const url = await service.addImages(id, files);
       await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(url);
     } catch (error) {
       console.error('Error uploading venue image:', error);
-      res.status(500).json({ error: error.message || 'Error uploading image' });
+      next(error);
     }
   }
 );
@@ -39,7 +41,8 @@ router.delete(
   async (req, res, next) => {
     try {
       const { id } = req.params;
-      const fields = await service.deleteImage(id);
+      // Sin `filename` borra todas las imagenes del local, como hacia antes.
+      const fields = await service.deleteImage(id, req.query.filename || null);
       await invalidateKeys([`venues`, `venues:${id}`]);
       res.send(fields);
     } catch (error) {
