@@ -3,11 +3,21 @@ const boom = require("@hapi/boom");
 const AirtableCrud = require("../libs/airtable.crud");
 const EventService = require("./event/event.service");
 const bcrypt = require("bcrypt");
+const { invalidateKeys } = require("../libs/redis.client");
 
 const airtableCrud = new AirtableCrud();
 const eventService = new EventService();
 
 const tableName = "Users";
+
+// Las dos claves bajo las que se cachea un usuario: `/auth/me` guarda el
+// registro por id y signToken lo guarda por email al iniciar sesion. Las dos
+// duran diez minutos, asi que una escritura tiene que borrar ambas o el login
+// siguiente devuelve el perfil anterior.
+const userCacheKeys = (id, email) => [
+  id ? `user:${id}` : null,
+  email ? `auth:user:${email}` : null,
+];
 
 class UserService {
   constructor() {
@@ -133,14 +143,32 @@ class UserService {
       id,
       fields
     );
+    // La invalidacion vive aqui y no en la ruta porque auth.service escribe
+    // usuarios directamente contra el servicio (recuperacion y cambio de
+    // contrasena): en el router esas escrituras dejarian la cache obsoleta.
+    await invalidateKeys(
+      userCacheKeys(id, updatedFields?.userEmail || fields?.userEmail)
+    );
     return updatedFields;
   }
 
   async delete(id) {
+    // Se lee antes de borrar para conocer el email: `deleteRecord` solo
+    // devuelve un booleano y despues ya no hay forma de saberlo.
+    let email = null;
+    try {
+      const previo = await airtableCrud.getRecordById(tableName, id);
+      email = previo?.userEmail || null;
+    } catch (error) {
+      console.log("no se pudo leer el usuario antes de borrarlo:", error.message);
+    }
+
     const deletedFields = await airtableCrud.deleteRecord(tableName, id);
     if (!deletedFields) {
       throw boom.notFound("Record not found");
     }
+
+    await invalidateKeys(userCacheKeys(id, email));
     return {
       message: "Element deleted",
       id,

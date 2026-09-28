@@ -9,7 +9,7 @@ const {
   queryUserSchema,
 } = require("../schemas/user.schema");
 
-const { getOrSetCache, invalidateCache } = require("../libs/redis.client");
+const { getOrSetCache } = require("../libs/redis.client");
 
 const router = express.Router();
 const service = new UserService();
@@ -70,8 +70,9 @@ router.put(
       const { id } = req.params;
       const body = req.body;
       console.log("Updating user with ID:", id, "with data:", body);
+      // La invalidacion de cache la hace el servicio, que es por donde pasan
+      // tambien las escrituras internas de auth.service.
       const fields = await service.update(id, body);
-      await invalidateCache(`user:${id}`);
       res.send(fields);
     } catch (error) {
       next(error);
