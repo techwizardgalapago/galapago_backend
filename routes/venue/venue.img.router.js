@@ -35,6 +35,23 @@ router.put(
   }
 );
 
+// Reordenar es una operacion aparte de subir: no lleva archivos, solo la lista
+// de nombres en el orden deseado.
+router.patch(
+  "/:id/orden",
+  validatorHandler(getVenueSchema, "params"),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const fields = await service.reorderImages(id, req.body?.filenames);
+      await invalidateKeys([`venues`, `venues:${id}`]);
+      res.send(fields);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.delete(
   "/:id",
   validatorHandler(getVenueSchema, "params"),

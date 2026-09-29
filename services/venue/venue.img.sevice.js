@@ -90,6 +90,50 @@ class VenueImgService {
     return updatedFields;
   }
 
+  // Reordena sin tocar S3: basta con reenviar a Airtable los mismos adjuntos
+  // en otro orden. `filenames` tiene que ser una permutacion de los actuales.
+  async reorderImages(id, filenames) {
+    if (!Array.isArray(filenames) || filenames.length === 0) {
+      throw boom.badRequest("Falta el orden de las imagenes");
+    }
+
+    const fields = await airtableCrud.getRecordById(tableName, id);
+    if (!fields) {
+      throw boom.notFound("Record not found");
+    }
+
+    const actuales = imagenesDe(fields);
+    if (actuales.length === 0) {
+      throw boom.notFound("El registro no tiene imagenes");
+    }
+
+    // Se consume de una cola por nombre: los registros anteriores al testigo
+    // en la clave pueden tener dos adjuntos con el mismo filename, y con un
+    // mapa simple uno de ellos se duplicaria y el otro se perderia.
+    const porNombre = new Map();
+    actuales.forEach((a) => {
+      const clave = a?.filename || "";
+      if (!porNombre.has(clave)) porNombre.set(clave, []);
+      porNombre.get(clave).push(a);
+    });
+
+    const ordenadas = [];
+    for (const nombre of filenames) {
+      const cola = porNombre.get(nombre);
+      if (cola?.length) ordenadas.push(cola.shift());
+    }
+
+    if (ordenadas.length !== actuales.length) {
+      throw boom.badRequest(
+        "El orden recibido no coincide con las imagenes del local"
+      );
+    }
+
+    return await airtableCrud.updateRecord(tableName, id, {
+      venueImage: comoAdjuntos(ordenadas),
+    });
+  }
+
   // Sin `filename` borra todas, que es lo que hacia antes cuando solo habia
   // una. Con `filename` borra esa y conserva el resto.
   async deleteImage(id, filename = null) {
